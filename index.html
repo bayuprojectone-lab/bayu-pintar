@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BAYU AI - Advanced Text & Voice Generator</title>
-    <!-- Memuat Puter.js -->
-    <script src="https://js.puter.com/v2/"></script>
+    <!-- MEMPERBARUI PUTER.JS KE V2.0 (Versi Terbaru) -->
+    <script src="https://js.puter.com/v2.0/"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -30,225 +30,117 @@
             position: relative;
         }
 
-        /* Background Canvas Animation */
         #bgCanvas {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: -1;
-            opacity: 0.5;
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; z-index: -1; opacity: 0.5;
         }
 
         .bg-gradient {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: radial-gradient(circle at 10% 20%, rgba(112, 0, 255, 0.15) 0%, transparent 40%),
                         radial-gradient(circle at 90% 80%, rgba(0, 242, 255, 0.1) 0%, transparent 40%);
             z-index: -2;
         }
 
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
+        .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
 
-        /* HEADER & PROFILE */
-        header {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            margin-bottom: 50px;
-        }
+        header { display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 50px; }
 
-        .profile-container {
-            position: relative;
-            width: 150px;
-            height: 150px;
-            margin-bottom: 25px;
-        }
+        .profile-container { position: relative; width: 150px; height: 150px; margin-bottom: 25px; }
 
         .profile-img {
-            width: 100%; height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid var(--primary);
-            box-shadow: 0 0 30px rgba(0, 242, 255, 0.3);
-            background: #111;
+            width: 100%; height: 100%; border-radius: 50%;
+            object-fit: cover; border: 3px solid var(--primary);
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.3); background: #111;
         }
 
         .profile-ring {
-            position: absolute;
-            top: -8px; left: -8px; right: -8px; bottom: -8px;
-            border: 2px solid transparent;
-            border-radius: 50%;
-            border-top-color: var(--accent);
-            border-right-color: var(--primary);
+            position: absolute; top: -8px; left: -8px; right: -8px; bottom: -8px;
+            border: 2px solid transparent; border-radius: 50%;
+            border-top-color: var(--accent); border-right-color: var(--primary);
             animation: spin 4s linear infinite;
         }
 
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
         header h1 {
-            font-size: 3.5rem;
-            font-weight: 800;
+            font-size: 3.5rem; font-weight: 800;
             background: linear-gradient(90deg, var(--primary), var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: 2px;
-            line-height: 1.1;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            letter-spacing: 2px; line-height: 1.1;
         }
 
-        header .subtitle {
-            color: var(--text-muted);
-            margin-top: 15px;
-            font-size: 1.1rem;
-            max-width: 600px;
-        }
+        header .subtitle { color: var(--text-muted); margin-top: 15px; font-size: 1.1rem; max-width: 600px; }
 
         header .dev-tag {
-            margin-top: 15px;
-            font-family: 'JetBrains Mono', monospace;
-            color: var(--primary);
-            background: rgba(0, 242, 255, 0.05);
-            padding: 6px 16px;
-            border-radius: 20px;
-            border: 1px solid rgba(0, 242, 255, 0.2);
-            font-size: 0.85rem;
+            margin-top: 15px; font-family: 'JetBrains Mono', monospace;
+            color: var(--primary); background: rgba(0, 242, 255, 0.05);
+            padding: 6px 16px; border-radius: 20px;
+            border: 1px solid rgba(0, 242, 255, 0.2); font-size: 0.85rem;
         }
 
-        /* STATS PANEL */
-        .stats-panel {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 40px;
-        }
+        .stats-panel { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 40px; }
 
-        .stat-box {
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            padding: 15px;
-            text-align: center;
-        }
-
+        .stat-box { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 12px; padding: 15px; text-align: center; }
         .stat-box h3 { color: var(--primary); font-size: 1.8rem; margin-bottom: 5px; }
         .stat-box p { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; }
 
-        /* GLASS CARDS */
         .glass-card {
-            background: var(--glass);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 30px;
-            margin-bottom: 25px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
-            position: relative;
-            overflow: hidden;
+            background: var(--glass); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border); border-radius: 16px; padding: 30px;
+            margin-bottom: 25px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            position: relative; overflow: hidden;
         }
 
         .glass-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 2px;
-            background: linear-gradient(90deg, transparent, var(--primary), transparent);
-            opacity: 0.5;
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent); opacity: 0.5;
         }
 
         .form-group { margin-bottom: 20px; }
 
         label {
-            display: flex; align-items: center; gap: 8px;
-            margin-bottom: 10px;
-            color: var(--text-muted);
-            font-size: 0.85rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+            color: var(--text-muted); font-size: 0.85rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 1px;
         }
 
         select, textarea {
-            width: 100%;
-            padding: 15px;
-            border-radius: 10px;
-            border: 1px solid var(--glass-border);
-            background: rgba(0, 0, 0, 0.4);
-            color: var(--text-main);
-            font-family: 'Outfit', sans-serif;
-            font-size: 16px;
-            transition: all 0.3s ease;
+            width: 100%; padding: 15px; border-radius: 10px;
+            border: 1px solid var(--glass-border); background: rgba(0, 0, 0, 0.4);
+            color: var(--text-main); font-family: 'Outfit', sans-serif;
+            font-size: 16px; transition: all 0.3s ease;
         }
 
-        textarea {
-            min-height: 120px;
-            resize: vertical;
-            font-family: 'JetBrains Mono', monospace;
-            line-height: 1.6;
-        }
-
+        textarea { min-height: 120px; resize: vertical; font-family: 'JetBrains Mono', monospace; line-height: 1.6; }
         select { appearance: none; cursor: pointer; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300f2ff' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 15px center; background-size: 15px; }
+        select:focus, textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 15px rgba(0, 242, 255, 0.2); }
 
-        select:focus, textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
-        }
-
-        /* BUTTONS */
         .btn-row { display: grid; grid-template-columns: 2fr 1fr; gap: 15px; }
         
         .btn {
-            padding: 16px 24px;
-            border-radius: 10px;
-            border: none;
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 15px;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            padding: 16px 24px; border-radius: 10px; border: none; cursor: pointer;
+            font-weight: 700; font-size: 15px; transition: all 0.3s ease;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            text-transform: uppercase; letter-spacing: 1px;
         }
 
-        .btn-primary {
-            background: linear-gradient(90deg, var(--secondary), var(--primary));
-            color: #050508;
-            box-shadow: 0 4px 15px rgba(0, 242, 255, 0.3);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 242, 255, 0.5);
-        }
-
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text-main);
-            border: 1px solid var(--glass-border);
-        }
-
+        .btn-primary { background: linear-gradient(90deg, var(--secondary), var(--primary)); color: #050508; box-shadow: 0 4px 15px rgba(0, 242, 255, 0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0, 242, 255, 0.5); }
+        .btn-secondary { background: rgba(255, 255, 255, 0.05); color: var(--text-main); border: 1px solid var(--glass-border); }
         .btn-secondary:hover { background: rgba(255, 255, 255, 0.1); border-color: var(--primary); }
         .btn:disabled { background: #333; color: #666; cursor: not-allowed; box-shadow: none; transform: none; }
 
         .audio-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
 
-        /* LOADING & TOAST */
         .loader { border: 3px solid rgba(255, 255, 255, 0.1); border-top: 3px solid var(--primary); border-radius: 50%; width: 18px; height: 18px; animation: spin 1s linear infinite; }
         .loading-state { display: none; align-items: center; gap: 10px; color: var(--primary); font-size: 14px; margin-top: 15px; }
         
         .toast {
             position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
-            background: var(--accent); color: white;
-            padding: 15px 30px; border-radius: 30px;
-            box-shadow: 0 5px 20px rgba(255, 0, 85, 0.4);
-            transition: all 0.3s ease; z-index: 9999; font-weight: 600;
+            background: var(--accent); color: white; padding: 15px 30px; border-radius: 30px;
+            box-shadow: 0 5px 20px rgba(255, 0, 85, 0.4); transition: all 0.3s ease;
+            z-index: 9999; font-weight: 600; max-width: 90vw; text-align: center;
         }
         .toast.show { transform: translateX(-50%) translateY(0); }
 
@@ -267,11 +159,9 @@
 
     <div class="container">
         
-        <!-- HEADER & PROFILE -->
         <header>
             <div class="profile-container">
                 <div class="profile-ring"></div>
-                <!-- Foto Anda sudah dimasukkan di sini -->
                 <img src="https://z-cdn-media.chatglm.cn/files/da9ed4d1-1857-44ce-94a8-af3a23f9afe6.jpeg?auth_key=1890007763-fb9cd1ce549549349728825172a9f109-0-156d82b540a59c1d5ae77f5030d540ce" alt="Bayu Profile" class="profile-img" onerror="this.src='https://ui-avatars.com/api/?name=BAYU+AI&size=150&background=050508&color=00f2ff';">
             </div>
             <h1>BAYU AI</h1>
@@ -279,20 +169,10 @@
             <div class="dev-tag">Eat. Code. Repeat. ⌨️</div>
         </header>
 
-        <!-- STATS PANEL -->
         <div class="stats-panel">
-            <div class="stat-box">
-                <h3>GPT-4o</h3>
-                <p>AI Engine</p>
-            </div>
-            <div class="stat-box">
-                <h3>8+</h3>
-                <p>Voice Options</p>
-            </div>
-            <div class="stat-box">
-                <h3>MP3</h3>
-                <p>Export Format</p>
-            </div>
+            <div class="stat-box"><h3>GPT-4o</h3><p>AI Engine</p></div>
+            <div class="stat-box"><h3>8+</h3><p>Voice Options</p></div>
+            <div class="stat-box"><h3>MP3</h3><p>Export Format</p></div>
         </div>
 
         <!-- BAGIAN GENERATE TEKS -->
@@ -355,9 +235,9 @@
     <div id="toast" class="toast"></div>
 
 <script>
-    // Inisialisasi Variabel
+    // Deklarasi Elemen
     const mode = document.getElementById('mode');
-    const prompt = document.getElementById('prompt');
+    const promptInput = document.getElementById('prompt');
     const outputText = document.getElementById('outputText');
     const voiceSelect = document.getElementById('voiceSelect');
     
@@ -374,18 +254,18 @@
 
     let audioBlobUrl = null;
 
-    // Fungsi Toast Notifikasi
+    // Fungsi Notifikasi Toast (Memunculkan error yang spesifik)
     function showToast(message, isSuccess = false) {
         toast.textContent = message;
         toast.style.background = isSuccess ? '#00f2ff' : '#ff0055';
         toast.style.color = isSuccess ? '#050508' : '#ffffff';
         toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 3000);
+        setTimeout(() => toast.classList.remove('show'), 5000);
     }
 
-    // 1. FUNGSI GENERATE TEKS AI (GPT-4o)
+    // 1. FUNGSI GENERATE TEKS
     generateTextBtn.addEventListener('click', async () => {
-        const userPrompt = prompt.value.trim();
+        const userPrompt = promptInput.value.trim();
         if (!userPrompt) return showToast("Mohon masukkan topik terlebih dahulu!");
 
         textLoading.style.display = 'flex';
@@ -399,7 +279,7 @@
                 systemPrompt = "Kamu adalah jurnalis profesional. Tulis berita faktual, tajam, dan jelas berdasarkan topik berikut. Gunakan format berita yang baik dengan Judul dan Isi dalam bahasa Indonesia formal.";
             }
 
-            // Memanggil API Puter untuk Chat
+            // PENANGANAN ERROR KETAT (Cara aman memanggil Puter)
             const response = await puter.ai.chat({
                 model: "gpt-4o",
                 messages: [
@@ -408,23 +288,26 @@
                 ]
             });
 
-            // Mengambil teks dari respons
+            // Cek apakah struktur datanya benar
             if (response && response.message && response.message.content) {
                 outputText.value = response.message.content;
                 showToast("Teks berhasil dibuat!", true);
             } else {
-                throw new Error("Format respons AI tidak dikenali");
+                // Jika format datanya beda, tampilkan ke user
+                console.error("Struktur Respons Tidak Dikenali:", response);
+                throw new Error("AI merespons dengan format yang tidak dikenali.");
             }
         } catch (error) {
             console.error("Detail Error:", error);
-            showToast("Koneksi AI gagal. Pastikan pop-up Puter login tidak di-blokir browser.");
+            // Tampilkan error asli dari API/Server
+            showToast("Error AI: " + error.message + ". (Pastikan pop-up login Puter tidak diblokir browser)");
         } finally {
             textLoading.style.display = 'none';
             generateTextBtn.disabled = false;
         }
     });
 
-    // 2. FUNGSI COPY TEKS
+    // 2. COPY TEKS
     copyTextBtn.addEventListener('click', () => {
         const text = outputText.value.trim();
         if (!text) return showToast("Tidak ada teks untuk dicopy!");
@@ -434,7 +317,7 @@
         }).catch(() => showToast("Gagal menyalin teks."));
     });
 
-    // 3. FUNGSI GENERATE SUARA (TTS)
+    // 3. GENERATE SUARA (TTS)
     generateAudioBtn.addEventListener('click', async () => {
         const text = outputText.value.trim();
         if (!text) return showToast("Tidak ada teks untuk dibaca!");
@@ -446,7 +329,6 @@
 
         try {
             const voice = voiceSelect.value;
-            // Memanggil API TTS Puter
             const audioElement = await puter.ai.txt2speech(text, voice);
             
             if (audioElement instanceof HTMLAudioElement) {
@@ -464,14 +346,14 @@
             
         } catch (error) {
             console.error("Error TTS:", error);
-            showToast("Gagal membuat suara. Coba pendekkan teks.");
+            showToast("Gagal membuat suara: " + error.message);
         } finally {
             audioLoading.style.display = 'none';
             generateAudioBtn.disabled = false;
         }
     });
 
-    // 4. PLAY / PAUSE AUDIO
+    // 4. PLAY / PAUSE
     playAudioBtn.addEventListener('click', () => {
         if (audioPlayer.src) {
             if (audioPlayer.paused) {
@@ -500,7 +382,7 @@
         showToast("File MP3 diunduh!", true);
     });
 
-    // BACKGROUND CANVAS ANIMATION (Network/Tech Feel)
+    // BACKGROUND CANVAS ANIMATION
     const canvas = document.getElementById('bgCanvas');
     const ctx = canvas.getContext('2d');
     let particles = [];
