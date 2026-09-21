@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BAYU AI - Digital Text & Voice Generator</title>
+    <!-- Memuat Puter.js -->
+    <script src="https://js.puter.com/v2/"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00f2ff; /* Neon Cyan */
+            --secondary: #7000ff; /* Electric Purple */
+            --bg-dark: #0a0b10;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-main: #ffffff;
+            --text-muted: #a0a0a0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(112, 0, 255, 0.2) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(0, 242, 255, 0.15) 0%, transparent 40%);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+        }
+
+        /* HEADER & PROFILE */
+        header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .profile-container {
+            position: relative;
+            width: 140px;
+            height: 140px;
+            margin-bottom: 20px;
+        }
+
+        .profile-img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--primary);
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.4);
+        }
+
+        .profile-ring {
+            position: absolute;
+            top: -5px; left: -5px; right: -5px; bottom: -5px;
+            border: 2px solid transparent;
+            border-radius: 50%;
+            border-top-color: var(--secondary);
+            border-right-color: var(--primary);
+            animation: spin 3s linear infinite;
+        }
+
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+
+        header h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
+        }
+
+        header .subtitle {
+            color: var(--text-muted);
+            margin-top: 10px;
+            font-size: 1.1rem;
+            max-width: 500px;
+        }
+
+        header .dev-tag {
+            margin-top: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--primary);
+            background: rgba(0, 242, 255, 0.1);
+            padding: 5px 15px;
+            border-radius: 20px;
+            border: 1px solid rgba(0, 242, 255, 0.3);
+            font-size: 0.9rem;
+        }
+
+        /* GLASS CARDS */
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        select, textarea {
+            width: 100%;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--glass-border);
+            background: rgba(0, 0, 0, 0.3);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+            font-family: 'JetBrains Mono', monospace; /* Coding style font */
+            line-height: 1.5;
+        }
+
+        select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
+        }
+
+        /* BUTTONS */
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(90deg, var(--secondary), var(--primary));
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(112, 0, 255, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 242, 255, 0.5);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            border: 1px solid var(--glass-border);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn:disabled {
+            background: #333;
+            color: #666;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .audio-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        /* LOADING ANIMATION */
+        .loader {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+
+        .loading-state {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            color: var(--primary);
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        /* TOAST NOTIFICATION */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #ff4757;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 9999;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            header h1 { font-size: 2.2rem; }
+            .audio-controls { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <!-- HEADER & PROFILE -->
+    <header>
+        <div class="profile-container">
+            <div class="profile-ring"></div>
+            <!-- INI ADALAH URL FOTO ANDA, GANTI LINK INI DENGAN LINK FOTO ANDA -->
+            <img src="https://z-cdn-media.chatglm.cn/files/da9ed4d1-1857-44ce-94a8-af3a23f9afe6.jpeg?auth_key=1890007763-fb9cd1ce549549349728825172a9f109-0-156d82b540a59c1d5ae77f5030d540ce" alt="Foto Profil" class="profile-img" onerror="this.src='https://ui-avatars.com/api/?name=BAYU+AI&size=140&background=0a0b10&color=00f2ff';">
+        </div>
+        <h1>BAYU AI</h1>
+        <p class="subtitle">AI Digital Assistant untuk Generasi Cerita, Berita, & Text-to-Speech Profesional.</p>
+        <div class="dev-tag">Eat. Code. Repeat. ⌨️</div>
+    </header>
+
+    <!-- BAGIAN TEKS -->
+    <div class="glass-card">
+        <div class="form-group">
+            <label for="mode">Pilih Mode AI</label>
+            <select id="mode">
+                <option value="cerita">📄 Generator Cerita Kreatif</option>
+                <option value="berita">📰 Generator Berita Jurnalistik</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="prompt">Topik / Ide Utama</label>
+            <textarea id="prompt" placeholder="Masukkan ide... Contoh: Petualangan di luar angkasa / Banjir di Ibu Kota"></textarea>
+        </div>
+        <button id="generateTextBtn" class="btn btn-primary">
+            ⚡ Generate Teks AI
+        </button>
+        <div id="textLoading" class="loading-state">
+            <div class="loader"></div>
+            <span>AI sedang merangkai kata...</span>
+        </div>
+    </div>
+
+    <!-- BAGIAN AUDIO & DOWNLOAD -->
+    <div class="glass-card">
+        <div class="form-group">
+            <label for="outputText">Output Teks (Bisa Edit)</label>
+            <textarea id="outputText" placeholder="Hasil teks dari AI akan muncul di sini..."></textarea>
+        </div>
+        
+        <div class="form-group">
+            <label for="voiceSelect">Pilih Karakter Suara</label>
+            <select id="voiceSelect">
+                <option value="af_sky">Wanita - Sky (Natural)</option>
+                <option value="af_bella">Wanita - Bella (Lembut)</option>
+                <option value="af_nicole">Wanita - Nicole (Profesional)</option>
+                <option value="af_sarah">Wanita - Sarah (Tegas)</option>
+                <option value="af_nova">Wanita - Nova (Bersemangat)</option>
+                <option value="am_adam">Pria - Adam (Dalam)</option>
+                <option value="am_michael">Pria - Michael (Jernih)</option>
+                <option value="am_george">Pria - George (Wibawa)</option>
+            </select>
+        </div>
+
+        <button id="generateAudioBtn" class="btn btn-secondary">
+            🔊 Generate Audio Suara
+        </button>
+        <div id="audioLoading" class="loading-state">
+            <div class="loader"></div>
+            <span>Memproses gelombang suara...</span>
+        </div>
+
+        <div class="audio-controls">
+            <button id="playAudioBtn" class="btn btn-secondary" disabled>▶️ Putar Audio</button>
+            <button id="downloadAudioBtn" class="btn btn-primary" disabled>⬇️ Download MP3</button>
+        </div>
+        <audio id="audioPlayer" style="display:none;"></audio>
+    </div>
+
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+    // Variabel DOM
+    const mode = document.getElementById('mode');
+    const prompt = document.getElementById('prompt');
+    const outputText = document.getElementById('outputText');
+    const voiceSelect = document.getElementById('voiceSelect');
+    
+    const generateTextBtn = document.getElementById('generateTextBtn');
+    const generateAudioBtn = document.getElementById('generateAudioBtn');
+    const playAudioBtn = document.getElementById('playAudioBtn');
+    const downloadAudioBtn = document.getElementById('downloadAudioBtn');
+    
+    const textLoading = document.getElementById('textLoading');
+    const audioLoading = document.getElementById('audioLoading');
+    const audioPlayer = document.getElementById('audioPlayer');
+    const toast = document.getElementById('toast');
+
+    let audioBlobUrl = null;
+
+    // Fungsi Toast Notification
+    function showToast(message) {
+        toast.textContent = message;
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
+    }
+
+    // 1. Generate Teks
+    generateTextBtn.addEventListener('click', async () => {
+        const userPrompt = prompt.value.trim();
+        if (!userPrompt) return showToast("Error: Masukkan topik terlebih dahulu!");
+
+        textLoading.style.display = 'flex';
+        generateTextBtn.disabled = true;
+
+        try {
+            let systemPrompt = "";
+            if (mode.value === 'cerita') {
+                systemPrompt = "Kamu adalah penulis cerita kreatif tingkat tinggi. Tulis cerita pendek yang sangat menarik, hidup, dan imajinatif berdasarkan topik berikut. Gunakan bahasa Indonesia yang indah.";
+            } else {
+                systemPrompt = "Kamu adalah jurnalis profesional tingkat tinggi. Tulis berita faktual, tajam, dan jelas berdasarkan topik berikut. Gunakan format berita (Judul, Lead, Isi) dalam bahasa Indonesia formal.";
+            }
+
+            const response = await puter.ai.chat({
+                model: "gpt-4o",
+                messages: [
+                    { role: "system", content: systemPrompt },
+                    { role: "user", content: userPrompt }
+                ]
+            });
+
+            outputText.value = response.message.content;
+        } catch (error) {
+            console.error("Error:", error);
+            showToast("Terjadi kesalahan koneksi ke AI. Coba lagi.");
+        } finally {
+            textLoading.style.display = 'none';
+            generateTextBtn.disabled = false;
+        }
+    });
+
+    // 2. Generate Audio
+    generateAudioBtn.addEventListener('click', async () => {
+        const text = outputText.value.trim();
+        if (!text) return showToast("Error: Tidak ada teks untuk dibaca!");
+
+        audioLoading.style.display = 'flex';
+        generateAudioBtn.disabled = true;
+        playAudioBtn.disabled = true;
+        downloadAudioBtn.disabled = true;
+
+        try {
+            const voice = voiceSelect.value;
+            const audioElement = await puter.ai.txt2speech(text, voice);
+            
+            if (audioElement instanceof HTMLAudioElement) {
+                audioBlobUrl = audioElement.src;
+            } else if (audioElement instanceof Blob) {
+                audioBlobUrl = URL.createObjectURL(audioElement);
+            } else {
+                audioBlobUrl = audioElement; 
+            }
+
+            audioPlayer.src = audioBlobUrl;
+            playAudioBtn.disabled = false;
+            downloadAudioBtn.disabled = false;
+            
+        } catch (error) {
+            console.error("Error generating audio:", error);
+            showToast("Gagal memproses suara. Coba pendekkan teks.");
+        } finally {
+            audioLoading.style.display = 'none';
+            generateAudioBtn.disabled = false;
+        }
+    });
+
+    // 3. Play/Pause Audio
+    playAudioBtn.addEventListener('click', () => {
+        if (audioPlayer.src) {
+            if (audioPlayer.paused) {
+                audioPlayer.play();
+                playAudioBtn.innerHTML = '⏸️ Jeda Audio';
+            } else {
+                audioPlayer.pause();
+                playAudioBtn.innerHTML = '▶️ Putar Audio';
+            }
+        }
+    });
+
+    audioPlayer.addEventListener('ended', () => {
+        playAudioBtn.innerHTML = '▶️ Putar Audio';
+    });
+
+    // 4. Download MP3
+    downloadAudioBtn.addEventListener('click', () => {
+        if (!audioBlobUrl) return;
+        
+        const a = document.createElement('a');
+        a.href = audioBlobUrl;
+        a.download = 'BAYU_AI_Voice.mp3';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    });
+</script>
+
+</body>
+</html>
