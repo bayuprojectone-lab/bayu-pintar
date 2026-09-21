@@ -3,41 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BAYU AI - Digital Text & Voice Generator</title>
+    <title>BAYU AI - Advanced Text & Voice Generator</title>
     <!-- Memuat Puter.js -->
     <script src="https://js.puter.com/v2/"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #00f2ff; /* Neon Cyan */
-            --secondary: #7000ff; /* Electric Purple */
-            --bg-dark: #0a0b10;
-            --glass: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.1);
+            --primary: #00f2ff;
+            --secondary: #7000ff;
+            --accent: #ff0055;
+            --bg-dark: #050508;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
             --text-main: #ffffff;
-            --text-muted: #a0a0a0;
+            --text-muted: #8888aa;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Outfit', sans-serif;
             background-color: var(--bg-dark);
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(112, 0, 255, 0.2) 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(0, 242, 255, 0.15) 0%, transparent 40%);
             color: var(--text-main);
             min-height: 100vh;
-            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Background Canvas Animation */
+        #bgCanvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1;
+            opacity: 0.5;
+        }
+
+        .bg-gradient {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 10% 20%, rgba(112, 0, 255, 0.15) 0%, transparent 40%),
+                        radial-gradient(circle at 90% 80%, rgba(0, 242, 255, 0.1) 0%, transparent 40%);
+            z-index: -2;
         }
 
         .container {
-            max-width: 900px;
-            margin: 40px auto;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
         }
 
         /* HEADER & PROFILE */
@@ -46,87 +59,113 @@
             flex-direction: column;
             align-items: center;
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 50px;
         }
 
         .profile-container {
             position: relative;
-            width: 140px;
-            height: 140px;
-            margin-bottom: 20px;
+            width: 150px;
+            height: 150px;
+            margin-bottom: 25px;
         }
 
         .profile-img {
-            width: 100%;
-            height: 100%;
+            width: 100%; height: 100%;
             border-radius: 50%;
             object-fit: cover;
             border: 3px solid var(--primary);
-            box-shadow: 0 0 20px rgba(0, 242, 255, 0.4);
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.3);
+            background: #111;
         }
 
         .profile-ring {
             position: absolute;
-            top: -5px; left: -5px; right: -5px; bottom: -5px;
+            top: -8px; left: -8px; right: -8px; bottom: -8px;
             border: 2px solid transparent;
             border-radius: 50%;
-            border-top-color: var(--secondary);
+            border-top-color: var(--accent);
             border-right-color: var(--primary);
-            animation: spin 3s linear infinite;
+            animation: spin 4s linear infinite;
         }
 
-        @keyframes spin {
-            100% { transform: rotate(360deg); }
-        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
 
         header h1 {
-            font-size: 3rem;
+            font-size: 3.5rem;
             font-weight: 800;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            background: linear-gradient(90deg, var(--primary), var(--accent));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             letter-spacing: 2px;
+            line-height: 1.1;
         }
 
         header .subtitle {
             color: var(--text-muted);
-            margin-top: 10px;
+            margin-top: 15px;
             font-size: 1.1rem;
-            max-width: 500px;
+            max-width: 600px;
         }
 
         header .dev-tag {
-            margin-top: 10px;
+            margin-top: 15px;
             font-family: 'JetBrains Mono', monospace;
             color: var(--primary);
-            background: rgba(0, 242, 255, 0.1);
-            padding: 5px 15px;
+            background: rgba(0, 242, 255, 0.05);
+            padding: 6px 16px;
             border-radius: 20px;
-            border: 1px solid rgba(0, 242, 255, 0.3);
-            font-size: 0.9rem;
+            border: 1px solid rgba(0, 242, 255, 0.2);
+            font-size: 0.85rem;
         }
+
+        /* STATS PANEL */
+        .stats-panel {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+
+        .stat-box {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .stat-box h3 { color: var(--primary); font-size: 1.8rem; margin-bottom: 5px; }
+        .stat-box p { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; }
 
         /* GLASS CARDS */
         .glass-card {
             background: var(--glass);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             border: 1px solid var(--glass-border);
             border-radius: 16px;
             padding: 30px;
             margin-bottom: 25px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
         }
 
-        .form-group {
-            margin-bottom: 20px;
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            opacity: 0.5;
         }
+
+        .form-group { margin-bottom: 20px; }
 
         label {
-            display: block;
-            margin-bottom: 8px;
+            display: flex; align-items: center; gap: 8px;
+            margin-bottom: 10px;
             color: var(--text-muted);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -135,52 +174,53 @@
         select, textarea {
             width: 100%;
             padding: 15px;
-            border-radius: 8px;
+            border-radius: 10px;
             border: 1px solid var(--glass-border);
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.4);
             color: var(--text-main);
-            font-family: 'Inter', sans-serif;
+            font-family: 'Outfit', sans-serif;
             font-size: 16px;
             transition: all 0.3s ease;
         }
 
         textarea {
-            min-height: 150px;
+            min-height: 120px;
             resize: vertical;
-            font-family: 'JetBrains Mono', monospace; /* Coding style font */
-            line-height: 1.5;
+            font-family: 'JetBrains Mono', monospace;
+            line-height: 1.6;
         }
+
+        select { appearance: none; cursor: pointer; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300f2ff' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 15px center; background-size: 15px; }
 
         select:focus, textarea:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
         }
 
         /* BUTTONS */
+        .btn-row { display: grid; grid-template-columns: 2fr 1fr; gap: 15px; }
+        
         .btn {
-            width: 100%;
-            padding: 15px;
-            border-radius: 8px;
+            padding: 16px 24px;
+            border-radius: 10px;
             border: none;
             cursor: pointer;
             font-weight: 700;
-            font-size: 16px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            font-size: 15px;
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
-            position: relative;
-            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .btn-primary {
             background: linear-gradient(90deg, var(--secondary), var(--primary));
-            color: #fff;
-            box-shadow: 0 4px 15px rgba(112, 0, 255, 0.4);
+            color: #050508;
+            box-shadow: 0 4px 15px rgba(0, 242, 255, 0.3);
         }
 
         .btn-primary:hover {
@@ -189,163 +229,140 @@
         }
 
         .btn-secondary {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
             color: var(--text-main);
             border: 1px solid var(--glass-border);
         }
 
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
+        .btn-secondary:hover { background: rgba(255, 255, 255, 0.1); border-color: var(--primary); }
+        .btn:disabled { background: #333; color: #666; cursor: not-allowed; box-shadow: none; transform: none; }
 
-        .btn:disabled {
-            background: #333;
-            color: #666;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
+        .audio-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
 
-        .audio-controls {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-top: 15px;
-        }
-
-        /* LOADING ANIMATION */
-        .loader {
-            border: 4px solid rgba(255, 255, 255, 0.1);
-            border-top: 4px solid var(--primary);
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            animation: spin 1s linear infinite;
-            display: none;
-        }
-
-        .loading-state {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            color: var(--primary);
-            font-size: 14px;
-            margin-top: 10px;
-            display: none;
-        }
-
-        /* TOAST NOTIFICATION */
+        /* LOADING & TOAST */
+        .loader { border: 3px solid rgba(255, 255, 255, 0.1); border-top: 3px solid var(--primary); border-radius: 50%; width: 18px; height: 18px; animation: spin 1s linear infinite; }
+        .loading-state { display: none; align-items: center; gap: 10px; color: var(--primary); font-size: 14px; margin-top: 15px; }
+        
         .toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #ff4757;
-            color: white;
-            padding: 15px 25px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            transform: translateX(400px);
-            transition: transform 0.3s ease;
-            z-index: 9999;
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
+            background: var(--accent); color: white;
+            padding: 15px 30px; border-radius: 30px;
+            box-shadow: 0 5px 20px rgba(255, 0, 85, 0.4);
+            transition: all 0.3s ease; z-index: 9999; font-weight: 600;
         }
+        .toast.show { transform: translateX(-50%) translateY(0); }
 
-        .toast.show {
-            transform: translateX(0);
-        }
-
-        /* RESPONSIVE */
         @media (max-width: 768px) {
-            header h1 { font-size: 2.2rem; }
-            .audio-controls { grid-template-columns: 1fr; }
+            header h1 { font-size: 2.5rem; }
+            .btn-row, .audio-controls { grid-template-columns: 1fr; }
+            .stats-panel { grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+            .stat-box h3 { font-size: 1.2rem; }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    
-    <!-- HEADER & PROFILE -->
-    <header>
-        <div class="profile-container">
-            <div class="profile-ring"></div>
-            <!-- INI ADALAH URL FOTO ANDA, GANTI LINK INI DENGAN LINK FOTO ANDA -->
-            <img src="https://z-cdn-media.chatglm.cn/files/da9ed4d1-1857-44ce-94a8-af3a23f9afe6.jpeg?auth_key=1890007763-fb9cd1ce549549349728825172a9f109-0-156d82b540a59c1d5ae77f5030d540ce" alt="Foto Profil" class="profile-img" onerror="this.src='https://ui-avatars.com/api/?name=BAYU+AI&size=140&background=0a0b10&color=00f2ff';">
-        </div>
-        <h1>BAYU AI</h1>
-        <p class="subtitle">AI Digital Assistant untuk Generasi Cerita, Berita, & Text-to-Speech Profesional.</p>
-        <div class="dev-tag">Eat. Code. Repeat. ⌨️</div>
-    </header>
+    <canvas id="bgCanvas"></canvas>
+    <div class="bg-gradient"></div>
 
-    <!-- BAGIAN TEKS -->
-    <div class="glass-card">
-        <div class="form-group">
-            <label for="mode">Pilih Mode AI</label>
-            <select id="mode">
-                <option value="cerita">📄 Generator Cerita Kreatif</option>
-                <option value="berita">📰 Generator Berita Jurnalistik</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="prompt">Topik / Ide Utama</label>
-            <textarea id="prompt" placeholder="Masukkan ide... Contoh: Petualangan di luar angkasa / Banjir di Ibu Kota"></textarea>
-        </div>
-        <button id="generateTextBtn" class="btn btn-primary">
-            ⚡ Generate Teks AI
-        </button>
-        <div id="textLoading" class="loading-state">
-            <div class="loader"></div>
-            <span>AI sedang merangkai kata...</span>
-        </div>
-    </div>
-
-    <!-- BAGIAN AUDIO & DOWNLOAD -->
-    <div class="glass-card">
-        <div class="form-group">
-            <label for="outputText">Output Teks (Bisa Edit)</label>
-            <textarea id="outputText" placeholder="Hasil teks dari AI akan muncul di sini..."></textarea>
-        </div>
+    <div class="container">
         
-        <div class="form-group">
-            <label for="voiceSelect">Pilih Karakter Suara</label>
-            <select id="voiceSelect">
-                <option value="af_sky">Wanita - Sky (Natural)</option>
-                <option value="af_bella">Wanita - Bella (Lembut)</option>
-                <option value="af_nicole">Wanita - Nicole (Profesional)</option>
-                <option value="af_sarah">Wanita - Sarah (Tegas)</option>
-                <option value="af_nova">Wanita - Nova (Bersemangat)</option>
-                <option value="am_adam">Pria - Adam (Dalam)</option>
-                <option value="am_michael">Pria - Michael (Jernih)</option>
-                <option value="am_george">Pria - George (Wibawa)</option>
-            </select>
+        <!-- HEADER & PROFILE -->
+        <header>
+            <div class="profile-container">
+                <div class="profile-ring"></div>
+                <!-- Foto Anda sudah dimasukkan di sini -->
+                <img src="https://z-cdn-media.chatglm.cn/files/da9ed4d1-1857-44ce-94a8-af3a23f9afe6.jpeg?auth_key=1890007763-fb9cd1ce549549349728825172a9f109-0-156d82b540a59c1d5ae77f5030d540ce" alt="Bayu Profile" class="profile-img" onerror="this.src='https://ui-avatars.com/api/?name=BAYU+AI&size=150&background=050508&color=00f2ff';">
+            </div>
+            <h1>BAYU AI</h1>
+            <p class="subtitle">Sistem AI Cerdas untuk Membuat Naskah, Berita, dan Voiceover Suara Premium.</p>
+            <div class="dev-tag">Eat. Code. Repeat. ⌨️</div>
+        </header>
+
+        <!-- STATS PANEL -->
+        <div class="stats-panel">
+            <div class="stat-box">
+                <h3>GPT-4o</h3>
+                <p>AI Engine</p>
+            </div>
+            <div class="stat-box">
+                <h3>8+</h3>
+                <p>Voice Options</p>
+            </div>
+            <div class="stat-box">
+                <h3>MP3</h3>
+                <p>Export Format</p>
+            </div>
         </div>
 
-        <button id="generateAudioBtn" class="btn btn-secondary">
-            🔊 Generate Audio Suara
-        </button>
-        <div id="audioLoading" class="loading-state">
-            <div class="loader"></div>
-            <span>Memproses gelombang suara...</span>
+        <!-- BAGIAN GENERATE TEKS -->
+        <div class="glass-card">
+            <div class="form-group">
+                <label for="mode">⚙️ Pilih Mode Kreativitas</label>
+                <select id="mode">
+                    <option value="cerita">📄 Mode Cerita Kreatif</option>
+                    <option value="berita">📰 Mode Berita Jurnalistik</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="prompt">✍️ Topik Utama / Ide</label>
+                <textarea id="prompt" placeholder="Contoh: Petualangan seru di luar angkasa atau Berita tentang teknologi AI masa depan..."></textarea>
+            </div>
+            <div class="btn-row">
+                <button id="generateTextBtn" class="btn btn-primary">⚡ Generate Teks</button>
+                <button id="copyTextBtn" class="btn btn-secondary">📋 Copy Teks</button>
+            </div>
+            <div id="textLoading" class="loading-state">
+                <div class="loader"></div> <span>AI sedang merangkai kata-kata...</span>
+            </div>
         </div>
 
-        <div class="audio-controls">
-            <button id="playAudioBtn" class="btn btn-secondary" disabled>▶️ Putar Audio</button>
-            <button id="downloadAudioBtn" class="btn btn-primary" disabled>⬇️ Download MP3</button>
+        <!-- BAGIAN TEXT-TO-SPEECH -->
+        <div class="glass-card">
+            <div class="form-group">
+                <label for="outputText">📑 Hasil Dokumen (Bisa Diedit)</label>
+                <textarea id="outputText" placeholder="Hasil teks AI akan otomatis muncul di sini..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="voiceSelect">🎙️ Pilih Karakter Suara</label>
+                <select id="voiceSelect">
+                    <option value="af_sky">Wanita - Sky (Natural & Bersih)</option>
+                    <option value="af_bella">Wanita - Bella (Lembut & Ramah)</option>
+                    <option value="af_nicole">Wanita - Nicole (Profesional)</option>
+                    <option value="af_sarah">Wanita - Sarah (Tegas & Jelas)</option>
+                    <option value="af_nova">Wanita - Nova (Bersemangat)</option>
+                    <option value="am_adam">Pria - Adam (Suara Dalam)</option>
+                    <option value="am_michael">Pria - Michael (Jernih & Berwibawa)</option>
+                    <option value="am_george">Pria - George (Berat & Solid)</option>
+                </select>
+            </div>
+
+            <button id="generateAudioBtn" class="btn btn-primary">🔊 Generate Suara (TTS)</button>
+            <div id="audioLoading" class="loading-state">
+                <div class="loader"></div> <span>Memproses gelombang audio...</span>
+            </div>
+
+            <div class="audio-controls">
+                <button id="playAudioBtn" class="btn btn-secondary" disabled>▶️ Putar Audio</button>
+                <button id="downloadAudioBtn" class="btn btn-primary" disabled>⬇️ Download MP3</button>
+            </div>
+            <audio id="audioPlayer" style="display:none;"></audio>
         </div>
-        <audio id="audioPlayer" style="display:none;"></audio>
+
     </div>
 
-</div>
-
-<div id="toast" class="toast"></div>
+    <div id="toast" class="toast"></div>
 
 <script>
-    // Variabel DOM
+    // Inisialisasi Variabel
     const mode = document.getElementById('mode');
     const prompt = document.getElementById('prompt');
     const outputText = document.getElementById('outputText');
     const voiceSelect = document.getElementById('voiceSelect');
     
     const generateTextBtn = document.getElementById('generateTextBtn');
+    const copyTextBtn = document.getElementById('copyTextBtn');
     const generateAudioBtn = document.getElementById('generateAudioBtn');
     const playAudioBtn = document.getElementById('playAudioBtn');
     const downloadAudioBtn = document.getElementById('downloadAudioBtn');
@@ -357,19 +374,19 @@
 
     let audioBlobUrl = null;
 
-    // Fungsi Toast Notification
-    function showToast(message) {
+    // Fungsi Toast Notifikasi
+    function showToast(message, isSuccess = false) {
         toast.textContent = message;
+        toast.style.background = isSuccess ? '#00f2ff' : '#ff0055';
+        toast.style.color = isSuccess ? '#050508' : '#ffffff';
         toast.classList.add('show');
-        setTimeout(() => {
-            toast.classList.remove('show');
-        }, 3000);
+        setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
-    // 1. Generate Teks
+    // 1. FUNGSI GENERATE TEKS AI (GPT-4o)
     generateTextBtn.addEventListener('click', async () => {
         const userPrompt = prompt.value.trim();
-        if (!userPrompt) return showToast("Error: Masukkan topik terlebih dahulu!");
+        if (!userPrompt) return showToast("Mohon masukkan topik terlebih dahulu!");
 
         textLoading.style.display = 'flex';
         generateTextBtn.disabled = true;
@@ -377,11 +394,12 @@
         try {
             let systemPrompt = "";
             if (mode.value === 'cerita') {
-                systemPrompt = "Kamu adalah penulis cerita kreatif tingkat tinggi. Tulis cerita pendek yang sangat menarik, hidup, dan imajinatif berdasarkan topik berikut. Gunakan bahasa Indonesia yang indah.";
+                systemPrompt = "Kamu adalah penulis cerita kreatif tingkat dunia. Tulis cerita pendek yang sangat menarik, hidup, dan penuh imajinasi berdasarkan topik berikut. Gunakan bahasa Indonesia yang indah dan mengalir.";
             } else {
-                systemPrompt = "Kamu adalah jurnalis profesional tingkat tinggi. Tulis berita faktual, tajam, dan jelas berdasarkan topik berikut. Gunakan format berita (Judul, Lead, Isi) dalam bahasa Indonesia formal.";
+                systemPrompt = "Kamu adalah jurnalis profesional. Tulis berita faktual, tajam, dan jelas berdasarkan topik berikut. Gunakan format berita yang baik dengan Judul dan Isi dalam bahasa Indonesia formal.";
             }
 
+            // Memanggil API Puter untuk Chat
             const response = await puter.ai.chat({
                 model: "gpt-4o",
                 messages: [
@@ -390,20 +408,36 @@
                 ]
             });
 
-            outputText.value = response.message.content;
+            // Mengambil teks dari respons
+            if (response && response.message && response.message.content) {
+                outputText.value = response.message.content;
+                showToast("Teks berhasil dibuat!", true);
+            } else {
+                throw new Error("Format respons AI tidak dikenali");
+            }
         } catch (error) {
-            console.error("Error:", error);
-            showToast("Terjadi kesalahan koneksi ke AI. Coba lagi.");
+            console.error("Detail Error:", error);
+            showToast("Koneksi AI gagal. Pastikan pop-up Puter login tidak di-blokir browser.");
         } finally {
             textLoading.style.display = 'none';
             generateTextBtn.disabled = false;
         }
     });
 
-    // 2. Generate Audio
+    // 2. FUNGSI COPY TEKS
+    copyTextBtn.addEventListener('click', () => {
+        const text = outputText.value.trim();
+        if (!text) return showToast("Tidak ada teks untuk dicopy!");
+        
+        navigator.clipboard.writeText(text).then(() => {
+            showToast("Teks berhasil disalin!", true);
+        }).catch(() => showToast("Gagal menyalin teks."));
+    });
+
+    // 3. FUNGSI GENERATE SUARA (TTS)
     generateAudioBtn.addEventListener('click', async () => {
         const text = outputText.value.trim();
-        if (!text) return showToast("Error: Tidak ada teks untuk dibaca!");
+        if (!text) return showToast("Tidak ada teks untuk dibaca!");
 
         audioLoading.style.display = 'flex';
         generateAudioBtn.disabled = true;
@@ -412,6 +446,7 @@
 
         try {
             const voice = voiceSelect.value;
+            // Memanggil API TTS Puter
             const audioElement = await puter.ai.txt2speech(text, voice);
             
             if (audioElement instanceof HTMLAudioElement) {
@@ -425,17 +460,18 @@
             audioPlayer.src = audioBlobUrl;
             playAudioBtn.disabled = false;
             downloadAudioBtn.disabled = false;
+            showToast("Audio siap diputar!", true);
             
         } catch (error) {
-            console.error("Error generating audio:", error);
-            showToast("Gagal memproses suara. Coba pendekkan teks.");
+            console.error("Error TTS:", error);
+            showToast("Gagal membuat suara. Coba pendekkan teks.");
         } finally {
             audioLoading.style.display = 'none';
             generateAudioBtn.disabled = false;
         }
     });
 
-    // 3. Play/Pause Audio
+    // 4. PLAY / PAUSE AUDIO
     playAudioBtn.addEventListener('click', () => {
         if (audioPlayer.src) {
             if (audioPlayer.paused) {
@@ -452,17 +488,87 @@
         playAudioBtn.innerHTML = '▶️ Putar Audio';
     });
 
-    // 4. Download MP3
+    // 5. DOWNLOAD MP3
     downloadAudioBtn.addEventListener('click', () => {
         if (!audioBlobUrl) return;
-        
         const a = document.createElement('a');
         a.href = audioBlobUrl;
         a.download = 'BAYU_AI_Voice.mp3';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
+        showToast("File MP3 diunduh!", true);
     });
+
+    // BACKGROUND CANVAS ANIMATION (Network/Tech Feel)
+    const canvas = document.getElementById('bgCanvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    class Particle {
+        constructor() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.size = Math.random() * 2 + 0.5;
+            this.speedX = (Math.random() - 0.5) * 0.5;
+            this.speedY = (Math.random() - 0.5) * 0.5;
+        }
+        update() {
+            this.x += this.speedX;
+            this.y += this.speedY;
+            if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+            if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+        }
+        draw() {
+            ctx.fillStyle = 'rgba(0, 242, 255, 0.5)';
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    function initParticles() {
+        particles = [];
+        const particleCount = Math.min(100, Math.floor(window.innerWidth / 15));
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
+    }
+
+    function connectParticles() {
+        for (let a = 0; a < particles.length; a++) {
+            for (let b = a; b < particles.length; b++) {
+                const dx = particles[a].x - particles[b].x;
+                const dy = particles[a].y - particles[b].y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < 120) {
+                    ctx.strokeStyle = `rgba(112, 0, 255, ${0.15 - dist/800})`;
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(particles[a].x, particles[a].y);
+                    ctx.lineTo(particles[b].x, particles[b].y);
+                    ctx.stroke();
+                }
+            }
+        }
+    }
+
+    function animateParticles() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => { p.update(); p.draw(); });
+        connectParticles();
+        requestAnimationFrame(animateParticles);
+    }
+
+    initParticles();
+    animateParticles();
 </script>
 
 </body>
