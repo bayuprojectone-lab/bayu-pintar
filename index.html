@@ -1,433 +1,240 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BAYU AI - Advanced Text & Voice Generator</title>
-    <!-- Memuat Puter.js Versi Mutakhir -->
-    <script src="https://js.puter.com/v2/0.0.1/"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #00f2ff;
-            --secondary: #7000ff;
-            --accent: #ff0055;
-            --bg-dark: #050508;
-            --glass: rgba(255, 255, 255, 0.03);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --text-main: #ffffff;
-            --text-muted: #8888aa;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            font-family: 'Outfit', sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            min-height: 100vh;
-            overflow-x: hidden;
-            position: relative;
-        }
-
-        #bgCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.5; }
-        .bg-gradient {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at 10% 20%, rgba(112, 0, 255, 0.15) 0%, transparent 40%),
-                        radial-gradient(circle at 90% 80%, rgba(0, 242, 255, 0.1) 0%, transparent 40%);
-            z-index: -2;
-        }
-
-        .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
-
-        header { display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 50px; }
-
-        .profile-container { position: relative; width: 150px; height: 150px; margin-bottom: 25px; }
-        .profile-img {
-            width: 100%; height: 100%; border-radius: 50%;
-            object-fit: cover; border: 3px solid var(--primary);
-            box-shadow: 0 0 30px rgba(0, 242, 255, 0.3); background: #111;
-        }
-        .profile-ring {
-            position: absolute; top: -8px; left: -8px; right: -8px; bottom: -8px;
-            border: 2px solid transparent; border-radius: 50%;
-            border-top-color: var(--accent); border-right-color: var(--primary);
-            animation: spin 4s linear infinite;
-        }
-
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-
-        header h1 {
-            font-size: 3.5rem; font-weight: 800;
-            background: linear-gradient(90deg, var(--primary), var(--accent));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            letter-spacing: 2px; line-height: 1.1;
-        }
-        header .subtitle { color: var(--text-muted); margin-top: 15px; font-size: 1.1rem; max-width: 600px; }
-        header .dev-tag {
-            margin-top: 15px; font-family: 'JetBrains Mono', monospace;
-            color: var(--primary); background: rgba(0, 242, 255, 0.05);
-            padding: 6px 16px; border-radius: 20px;
-            border: 1px solid rgba(0, 242, 255, 0.2); font-size: 0.85rem;
-        }
-
-        .stats-panel { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 40px; }
-        .stat-box { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 12px; padding: 15px; text-align: center; }
-        .stat-box h3 { color: var(--primary); font-size: 1.8rem; margin-bottom: 5px; }
-        .stat-box p { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; }
-
-        .glass-card {
-            background: var(--glass); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            border: 1px solid var(--glass-border); border-radius: 16px; padding: 30px;
-            margin-bottom: 25px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
-            position: relative; overflow: hidden;
-        }
-        .glass-card::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
-            background: linear-gradient(90deg, transparent, var(--primary), transparent); opacity: 0.5;
-        }
-
-        .form-group { margin-bottom: 20px; }
-        label {
-            display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
-            color: var(--text-muted); font-size: 0.85rem; font-weight: 600;
-            text-transform: uppercase; letter-spacing: 1px;
-        }
-
-        select, textarea {
-            width: 100%; padding: 15px; border-radius: 10px;
-            border: 1px solid var(--glass-border); background: rgba(0, 0, 0, 0.4);
-            color: var(--text-main); font-family: 'Outfit', sans-serif;
-            font-size: 16px; transition: all 0.3s ease;
-        }
-        textarea { min-height: 120px; resize: vertical; font-family: 'JetBrains Mono', monospace; line-height: 1.6; }
-        select { appearance: none; cursor: pointer; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300f2ff' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 15px center; background-size: 15px; }
-        select:focus, textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 15px rgba(0, 242, 255, 0.2); }
-
-        .btn-row { display: grid; grid-template-columns: 2fr 1fr; gap: 15px; }
-        .btn {
-            padding: 16px 24px; border-radius: 10px; border: none; cursor: pointer;
-            font-weight: 700; font-size: 15px; transition: all 0.3s ease;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-            text-transform: uppercase; letter-spacing: 1px;
-        }
-        .btn-primary { background: linear-gradient(90deg, var(--secondary), var(--primary)); color: #050508; box-shadow: 0 4px 15px rgba(0, 242, 255, 0.3); }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0, 242, 255, 0.5); }
-        .btn-secondary { background: rgba(255, 255, 255, 0.05); color: var(--text-main); border: 1px solid var(--glass-border); }
-        .btn-secondary:hover { background: rgba(255, 255, 255, 0.1); border-color: var(--primary); }
-        .btn:disabled { background: #333; color: #666; cursor: not-allowed; box-shadow: none; transform: none; }
-
-        .audio-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
-
-        .loader { border: 3px solid rgba(255, 255, 255, 0.1); border-top: 3px solid var(--primary); border-radius: 50%; width: 18px; height: 18px; animation: spin 1s linear infinite; }
-        .loading-state { display: none; align-items: center; gap: 10px; color: var(--primary); font-size: 14px; margin-top: 15px; }
-        
-        .toast {
-            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
-            background: var(--accent); color: white; padding: 15px 30px; border-radius: 30px;
-            box-shadow: 0 5px 20px rgba(255, 0, 85, 0.4); transition: all 0.3s ease;
-            z-index: 9999; font-weight: 600; max-width: 90vw; text-align: center; font-size: 14px;
-        }
-        .toast.show { transform: translateX(-50%) translateY(0); }
-
-        @media (max-width: 768px) {
-            header h1 { font-size: 2.5rem; }
-            .btn-row, .audio-controls { grid-template-columns: 1fr; }
-            .stats-panel { grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-            .stat-box h3 { font-size: 1.2rem; }
-        }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Affiliate Video Generator</title>
+<script src="https://js.puter.com/v2/"></script>
+<style>
+:root{--bg:#0b1020;--panel:#121a2e;--panel2:#18233b;--line:#293653;--text:#eef4ff;--muted:#a9b6ce;--accent:#8b5cf6;--accent2:#22d3ee;--good:#34d399;--warn:#fbbf24}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top right,#22204a 0,transparent 38%),var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+.wrap{max-width:1180px;margin:auto;padding:24px}.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:26px}.brand{display:flex;align-items:center;gap:12px}.logo{display:grid;place-items:center;width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));font-size:23px;color:white}.brand h1{font-size:clamp(19px,3vw,27px);margin:0;letter-spacing:-.5px}.brand p{margin:2px 0 0;color:var(--muted);font-size:13px}.pill{border:1px solid #3b4563;background:#171f35;color:#d9e2ff;padding:7px 11px;border-radius:99px;font-size:12px;white-space:nowrap}
+.hero{padding:25px;border:1px solid var(--line);border-radius:24px;background:linear-gradient(120deg,rgba(139,92,246,.16),rgba(34,211,238,.06));margin-bottom:22px}.hero h2{font-size:clamp(24px,4vw,36px);line-height:1.12;margin:0 0 10px;letter-spacing:-1px}.hero p{max-width:760px;color:var(--muted);margin:0}.layout{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(300px,.95fr);gap:20px}.panel{background:rgba(18,26,46,.94);border:1px solid var(--line);border-radius:20px;padding:20px;min-width:0}.panel h3{margin:0 0 15px;font-size:17px}.field{margin:15px 0}.field label{display:block;font-weight:650;margin-bottom:7px;font-size:13px;color:#dbe5fb}input[type=text],textarea,select{width:100%;background:#0c1427;color:var(--text);border:1px solid #35415e;border-radius:11px;padding:12px;font:inherit;outline:none}textarea{resize:vertical;min-height:86px}input:focus,textarea:focus,select:focus{border-color:var(--accent2);box-shadow:0 0 0 3px #22d3ee20}.upload{border:1.5px dashed #596b91;background:#0d1528;border-radius:15px;min-height:180px;display:grid;place-items:center;text-align:center;padding:18px;cursor:pointer;overflow:hidden}.upload:hover{border-color:var(--accent2)}.upload img{max-width:100%;max-height:290px;object-fit:contain;border-radius:9px}.upload strong{display:block;margin:8px 0}.upload small{color:var(--muted)}.upload input{display:none}.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.btn{border:0;border-radius:12px;padding:12px 16px;font:inherit;font-weight:750;cursor:pointer;transition:transform .15s,opacity .15s}.btn:hover{transform:translateY(-1px)}.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}.primary{background:linear-gradient(110deg,var(--accent),#6366f1);color:white;width:100%;margin-top:8px}.secondary{background:#202c46;color:#edf3ff;border:1px solid #3a4969}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px}.actions .btn{flex:1}.preview{background:#070b14;border:1px solid #2d3953;border-radius:16px;min-height:330px;display:grid;place-items:center;overflow:hidden;padding:12px}.preview video{width:100%;max-height:560px;border-radius:10px;background:#000}.empty{text-align:center;padding:30px;color:var(--muted)}.empty .symbol{font-size:42px;margin-bottom:8px}.status{display:none;margin-top:14px;border-radius:12px;padding:12px;background:#0d1528;border:1px solid #34415d;color:#dbe7ff;white-space:pre-wrap}.status.show{display:block}.status.error{border-color:#a33c55;color:#fecdd3}.status.success{border-color:#23775d;color:#bbf7d0}.spinner{display:inline-block;width:14px;height:14px;border:2px solid #8190ad;border-top-color:white;border-radius:50%;animation:spin .8s linear infinite;vertical-align:-2px;margin-right:8px}@keyframes spin{to{transform:rotate(360deg)}}.tip{font-size:12px;color:var(--muted);margin-top:12px}.captionBox{min-height:110px}.footer{color:var(--muted);font-size:12px;text-align:center;margin:24px 0 6px}.hidden{display:none!important}
+@media(max-width:800px){.wrap{padding:14px}.layout{grid-template-columns:1fr}.top{align-items:flex-start}.pill{white-space:normal;text-align:center}.hero{padding:20px}.panel{padding:16px}.preview{min-height:260px}}
+@media(max-width:420px){.row{grid-template-columns:1fr}.top{flex-direction:column}.pill{align-self:flex-start}}
+</style>
 </head>
 <body>
-
-    <canvas id="bgCanvas"></canvas>
-    <div class="bg-gradient"></div>
-
-    <div class="container">
-        <header>
-            <div class="profile-container">
-                <div class="profile-ring"></div>
-                <img src="https://z-cdn-media.chatglm.cn/files/da9ed4d1-1857-44ce-94a8-af3a23f9afe6.jpeg?auth_key=1890007763-fb9cd1ce549549349728825172a9f109-0-156d82b540a59c1d5ae77f5030d540ce" alt="Bayu Profile" class="profile-img" onerror="this.src='https://ui-avatars.com/api/?name=BAYU+AI&size=150&background=050508&color=00f2ff';">
-            </div>
-            <h1>BAYU AI</h1>
-            <p class="subtitle">Sistem AI Cerdas untuk Membuat Naskah, Berita, dan Voiceover Suara Premium.</p>
-            <div class="dev-tag">Eat. Code. Repeat. ⌨️</div>
-        </header>
-
-        <div class="stats-panel">
-            <div class="stat-box"><h3>GPT-4o</h3><p>AI Engine</p></div>
-            <div class="stat-box"><h3>8+</h3><p>Voice Options</p></div>
-            <div class="stat-box"><h3>MP3</h3><p>Export Format</p></div>
-        </div>
-
-        <div class="glass-card">
-            <div class="form-group">
-                <label for="mode">⚙️ Pilih Mode Kreativitas</label>
-                <select id="mode">
-                    <option value="cerita">📄 Mode Cerita Kreatif</option>
-                    <option value="berita">📰 Mode Berita Jurnalistik</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="prompt">✍️ Topik Utama / Ide</label>
-                <textarea id="prompt" placeholder="Contoh: Petualangan seru di luar angkasa atau Berita tentang teknologi AI masa depan..."></textarea>
-            </div>
-            <div class="btn-row">
-                <button id="generateTextBtn" class="btn btn-primary">⚡ Generate Teks</button>
-                <button id="copyTextBtn" class="btn btn-secondary">📋 Copy Teks</button>
-            </div>
-            <div id="textLoading" class="loading-state">
-                <div class="loader"></div> <span>AI sedang merangkai kata-kata...</span>
-            </div>
-        </div>
-
-        <div class="glass-card">
-            <div class="form-group">
-                <label for="outputText">📑 Hasil Dokumen (Bisa Diedit)</label>
-                <textarea id="outputText" placeholder="Hasil teks AI akan otomatis muncul di sini..."></textarea>
-            </div>
-            
-            <div class="form-group">
-                <label for="voiceSelect">🎙️ Pilih Karakter Suara</label>
-                <select id="voiceSelect">
-                    <option value="af_sky">Wanita - Sky (Natural & Bersih)</option>
-                    <option value="af_bella">Wanita - Bella (Lembut & Ramah)</option>
-                    <option value="af_nicole">Wanita - Nicole (Profesional)</option>
-                    <option value="af_sarah">Wanita - Sarah (Tegas & Jelas)</option>
-                    <option value="af_nova">Wanita - Nova (Bersemangat)</option>
-                    <option value="am_adam">Pria - Adam (Suara Dalam)</option>
-                    <option value="am_michael">Pria - Michael (Jernih & Berwibawa)</option>
-                    <option value="am_george">Pria - George (Berat & Solid)</option>
-                </select>
-            </div>
-
-            <button id="generateAudioBtn" class="btn btn-primary">🔊 Generate Suara (TTS)</button>
-            <div id="audioLoading" class="loading-state">
-                <div class="loader"></div> <span>Memproses gelombang audio...</span>
-            </div>
-
-            <div class="audio-controls">
-                <button id="playAudioBtn" class="btn btn-secondary" disabled>▶️ Putar Audio</button>
-                <button id="downloadAudioBtn" class="btn btn-primary" disabled>⬇️ Download MP3</button>
-            </div>
-            <audio id="audioPlayer" style="display:none;"></audio>
-        </div>
-    </div>
-
-    <div id="toast" class="toast"></div>
-
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><div class="logo">▶</div><div><h1>AI Affiliate Video</h1><p>Foto produk → video promosi dengan AI</p></div></div>
+    <span class="pill">POWERED BY PUTER AI</span>
+  </header>
+  <section class="hero">
+    <h2>Hidupkan foto produkmu.<br>Jadikan konten affiliate.</h2>
+    <p>Unggah foto produk, tentukan gerakannya, lalu buat video pendek untuk konten promosi. Periksa hasil AI sebelum dipublikasikan dan jangan menambahkan klaim produk yang tidak terbukti.</p>
+  </section>
+  <main class="layout">
+    <section class="panel">
+      <h3>01 · Siapkan video</h3>
+      <label class="upload" id="uploadBox" for="photoInput">
+        <div id="uploadPrompt"><div style="font-size:32px">＋</div><strong>Pilih foto produk</strong><small>JPG, PNG, atau WEBP · pilih foto yang jelas</small></div>
+        <img id="photoPreview" class="hidden" alt="Pratinjau foto produk">
+        <input id="photoInput" type="file" accept="image/png,image/jpeg,image/webp">
+      </label>
+      <div class="field"><label for="productName">Nama produk</label><input id="productName" type="text" placeholder="Contoh: botol minum stainless"></div>
+      <div class="field"><label for="motion">Gaya gerakan video</label>
+        <select id="motion">
+          <option value="The camera slowly pushes in toward the product, with subtle parallax and soft studio lighting. Keep the product shape, label, colors and proportions consistent.">Zoom sinematik — halus dan elegan</option>
+          <option value="The product rotates slowly on a clean display surface while the camera makes a gentle orbit. Preserve the exact product design and label.">Produk berputar perlahan</option>
+          <option value="A gentle camera pan from left to right, soft natural light moving across the product, premium commercial look. Keep the product unchanged.">Kamera bergerak kiri ke kanan</option>
+          <option value="The scene comes alive with subtle natural environmental motion and a gentle cinematic camera move. Keep the product stable and accurate.">Suasana hidup dan natural</option>
+          <option value="Create a polished vertical social-commerce product showcase with a slow push-in, clean background and smooth motion. Preserve product accuracy.">Iklan produk untuk Reels/TikTok</option>
+        </select>
+      </div>
+      <div class="row">
+        <div class="field"><label for="model">Model video</label><select id="model">
+          <option value="wan2.7-i2v">Wan 2.7 (image-to-video)</option>
+          <option value="seedance-1.5-pro">Seedance 1.5 Pro</option>
+          <option value="vidu/vidu-q1">Vidu Q1</option>
+        </select></div>
+        <div class="field"><label for="duration">Durasi</label><select id="duration"><option value="5">5 detik</option><option value="8">8 detik</option><option value="10">10 detik</option></select></div>
+      </div>
+      <div class="row">
+        <div class="field"><label for="ratio">Format konten</label><select id="ratio"><option value="9:16">Vertikal 9:16</option><option value="16:9">Lanskap 16:9</option><option value="1:1">Kotak 1:1</option></select></div>
+        <div class="field"><label for="audio">Audio</label><select id="audio"><option value="true">Audio AI jika didukung</option><option value="false">Tanpa audio</option></select></div>
+      </div>
+      <div class="field"><label for="extraPrompt">Instruksi tambahan (opsional)</label><textarea id="extraPrompt" placeholder="Contoh: latar meja kayu, cahaya pagi, suasana premium. Hindari teks di dalam video."></textarea></div>
+      <button id="generateBtn" class="btn primary">✨ Buat video hidup</button>
+      <div id="status" class="status" role="status" aria-live="polite"></div>
+      <p class="tip">Video AI asli mungkin memerlukan login Puter dan kredit sesuai model. Jangan tutup halaman saat proses berlangsung.</p>
+    </section>
+    <section class="panel">
+      <h3>02 · Hasil video</h3>
+      <div class="preview" id="videoPreview">
+        <div class="empty"><div class="symbol">▧ ▶</div><strong>Video akan tampil di sini</strong><div style="margin-top:5px">Unggah foto lalu tekan “Buat video hidup”.</div></div>
+      </div>
+      <div class="actions">
+        <button id="downloadBtn" class="btn secondary" disabled>⬇ Unduh video</button>
+        <button id="newBtn" class="btn secondary">↻ Mulai ulang</button>
+      </div>
+      <div class="field"><label for="caption">Caption affiliate</label><textarea id="caption" class="captionBox" placeholder="Caption promosi akan dibuat di sini. Anda juga bisa menulis sendiri."></textarea></div>
+      <div class="row">
+        <button id="captionBtn" class="btn secondary">✍ Buat caption AI</button>
+        <button id="copyCaptionBtn" class="btn secondary">Salin caption</button>
+      </div>
+      <p class="tip">Tautan affiliate tidak otomatis ditambahkan. Tempelkan tautan resmi milik Anda di caption setelah memeriksa ketentuan platform dan program affiliate.</p>
+    </section>
+  </main>
+  <footer class="footer">AI Affiliate Video Generator · Pastikan Anda memiliki hak untuk menggunakan foto dan merek produk.</footer>
+</div>
 <script>
-    const mode = document.getElementById('mode');
-    const promptInput = document.getElementById('prompt');
-    const outputText = document.getElementById('outputText');
-    const voiceSelect = document.getElementById('voiceSelect');
-    
-    const generateTextBtn = document.getElementById('generateTextBtn');
-    const copyTextBtn = document.getElementById('copyTextBtn');
-    const generateAudioBtn = document.getElementById('generateAudioBtn');
-    const playAudioBtn = document.getElementById('playAudioBtn');
-    const downloadAudioBtn = document.getElementById('downloadAudioBtn');
-    
-    const textLoading = document.getElementById('textLoading');
-    const audioLoading = document.getElementById('audioLoading');
-    const audioPlayer = document.getElementById('audioPlayer');
-    const toast = document.getElementById('toast');
+(() => {
+  const $ = id => document.getElementById(id);
+  let imageDataUrl = null;
+  let videoObjectUrl = null;
+  let videoElement = null;
+  let busy = false;
 
-    let audioBlobUrl = null;
-
-    function showToast(message, isSuccess = false) {
-        toast.textContent = message;
-        toast.style.background = isSuccess ? '#00f2ff' : '#ff0055';
-        toast.style.color = isSuccess ? '#050508' : '#ffffff';
-        toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 5000);
-    }
-
-    // 1. GENERATE TEKS
-    generateTextBtn.addEventListener('click', async () => {
-        const userPrompt = promptInput.value.trim();
-        if (!userPrompt) return showToast("Mohon masukkan topik terlebih dahulu!");
-
-        textLoading.style.display = 'flex';
-        generateTextBtn.disabled = true;
-
-        try {
-            let systemPrompt = "";
-            if (mode.value === 'cerita') {
-                systemPrompt = "Kamu adalah penulis cerita kreatif tingkat dunia. Tulis cerita pendek yang sangat menarik, hidup, dan penuh imajinasi berdasarkan topik berikut. Gunakan bahasa Indonesia yang indah dan mengalir.";
-            } else {
-                systemPrompt = "Kamu adalah jurnalis profesional. Tulis berita faktual, tajam, dan jelas berdasarkan topik berikut. Gunakan format berita yang baik dengan Judul dan Isi dalam bahasa Indonesia formal.";
-            }
-
-            const response = await puter.ai.chat({
-                model: "gpt-4o",
-                messages: [
-                    { role: "system", content: systemPrompt },
-                    { role: "user", content: userPrompt }
-                ]
-            });
-
-            if (response && response.message && response.message.content) {
-                outputText.value = response.message.content;
-                showToast("Teks berhasil dibuat!", true);
-            } else {
-                throw new Error("AI merespons dengan format yang tidak dikenali.");
-            }
-        } catch (error) {
-            console.error("Detail Error:", error);
-            // Memberitahukan error spesifik agar mudah diperbaiki
-            showToast("Error AI: " + (error.message || "Gagal memuat") + ". Pastikan login berhasil.");
-        } finally {
-            textLoading.style.display = 'none';
-            generateTextBtn.disabled = false;
-        }
+  function status(message, type='') {
+    const el = $('status');
+    el.textContent = message;
+    el.className = 'status show' + (type ? ' ' + type : '');
+  }
+  function setBusy(value) {
+    busy = value;
+    $('generateBtn').disabled = value;
+    $('captionBtn').disabled = value;
+    $('generateBtn').innerHTML = value ? '<span class="spinner"></span>Membuat video…' : '✨ Buat video hidup';
+  }
+  function fileToDataUrl(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(new Error('Foto gagal dibaca. Coba pilih file lain.'));
+      reader.readAsDataURL(file);
     });
+  }
+  $('photoInput').addEventListener('change', async e => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { status('Pilih file gambar yang valid.', 'error'); return; }
+    if (file.size > 15 * 1024 * 1024) { status('Ukuran foto terlalu besar. Gunakan foto di bawah 15 MB.', 'error'); return; }
+    try {
+      imageDataUrl = await fileToDataUrl(file);
+      $('photoPreview').src = imageDataUrl;
+      $('photoPreview').classList.remove('hidden');
+      $('uploadPrompt').classList.add('hidden');
+      status('Foto siap. Atur gaya gerakan lalu buat video.', 'success');
+    } catch (err) { status(err.message, 'error'); }
+  });
 
-    // 2. COPY TEKS
-    copyTextBtn.addEventListener('click', () => {
-        const text = outputText.value.trim();
-        if (!text) return showToast("Tidak ada teks untuk dicopy!");
-        
-        navigator.clipboard.writeText(text).then(() => {
-            showToast("Teks berhasil disalin!", true);
-        }).catch(() => showToast("Gagal menyalin teks."));
-    });
-
-    // 3. GENERATE SUARA
-    generateAudioBtn.addEventListener('click', async () => {
-        const text = outputText.value.trim();
-        if (!text) return showToast("Tidak ada teks untuk dibaca!");
-
-        audioLoading.style.display = 'flex';
-        generateAudioBtn.disabled = true;
-        playAudioBtn.disabled = true;
-        downloadAudioBtn.disabled = true;
-
-        try {
-            const voice = voiceSelect.value;
-            const audioElement = await puter.ai.txt2speech(text, voice);
-            
-            if (audioElement instanceof HTMLAudioElement) {
-                audioBlobUrl = audioElement.src;
-            } else if (audioElement instanceof Blob) {
-                audioBlobUrl = URL.createObjectURL(audioElement);
-            } else {
-                audioBlobUrl = audioElement; 
-            }
-
-            audioPlayer.src = audioBlobUrl;
-            playAudioBtn.disabled = false;
-            downloadAudioBtn.disabled = false;
-            showToast("Audio siap diputar!", true);
-            
-        } catch (error) {
-            console.error("Error TTS:", error);
-            showToast("Gagal membuat suara: " + (error.message || "Error tidak diketahui"));
-        } finally {
-            audioLoading.style.display = 'none';
-            generateAudioBtn.disabled = false;
-        }
-    });
-
-    // 4. PLAY / PAUSE
-    playAudioBtn.addEventListener('click', () => {
-        if (audioPlayer.src) {
-            if (audioPlayer.paused) {
-                audioPlayer.play();
-                playAudioBtn.innerHTML = '⏸️ Jeda Audio';
-            } else {
-                audioPlayer.pause();
-                playAudioBtn.innerHTML = '▶️ Putar Audio';
-            }
-        }
-    });
-
-    audioPlayer.addEventListener('ended', () => {
-        playAudioBtn.innerHTML = '▶️ Putar Audio';
-    });
-
-    // 5. DOWNLOAD MP3
-    downloadAudioBtn.addEventListener('click', () => {
-        if (!audioBlobUrl) return;
-        const a = document.createElement('a');
-        a.href = audioBlobUrl;
-        a.download = 'BAYU_AI_Voice.mp3';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        showToast("File MP3 diunduh!", true);
-    });
-
-    // BACKGROUND ANIMATION
-    const canvas = document.getElementById('bgCanvas');
-    const ctx = canvas.getContext('2d');
-    let particles = [];
-
-    function resizeCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+  $('generateBtn').addEventListener('click', async () => {
+    if (busy) return;
+    if (!imageDataUrl) { status('Unggah foto produk terlebih dahulu.', 'error'); return; }
+    if (!window.puter || !puter.ai || !puter.ai.txt2vid) {
+      status('Puter AI belum termuat. Periksa koneksi internet, lalu muat ulang halaman.', 'error'); return;
     }
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
-
-    class Particle {
-        constructor() {
-            this.x = Math.random() * canvas.width;
-            this.y = Math.random() * canvas.height;
-            this.size = Math.random() * 2 + 0.5;
-            this.speedX = (Math.random() - 0.5) * 0.5;
-            this.speedY = (Math.random() - 0.5) * 0.5;
+    setBusy(true);
+    status('Mengirim foto dan instruksi ke Puter AI. Proses video dapat memerlukan beberapa menit. Jangan tutup halaman.');
+    try {
+      const product = $('productName').value.trim();
+      const extra = $('extraPrompt').value.trim();
+      const motion = $('motion').value;
+      const ratio = $('ratio').value;
+      const prompt = [
+        'Create a polished short product affiliate advertisement video based on the supplied reference image.',
+        product ? 'Product name: ' + product + '.' : '',
+        motion,
+        extra ? 'Additional direction: ' + extra : '',
+        'Keep the product faithful to the reference image. Do not invent extra packaging, logos, claims, text, discounts, or product features. Smooth realistic motion, clear product visibility, professional lighting.',
+        'Composition for aspect ratio ' + ratio + '.'
+      ].filter(Boolean).join(' ');
+      const model = $('model').value;
+      const options = { model, seconds: Number($('duration').value), aspect_ratio: ratio, input_reference: imageDataUrl, generate_audio: $('audio').value === 'true' };
+      let result;
+      try {
+        result = await puter.ai.txt2vid(prompt, options);
+      } catch (firstError) {
+        // Retry with broadly compatible options, preserving image-to-video behavior.
+        if (model === 'wan2.7-i2v') {
+          options.model = 'wan-ai/wan2.7-i2v';
+          result = await puter.ai.txt2vid(prompt, options);
+        } else {
+          throw firstError;
         }
-        update() {
-            this.x += this.speedX;
-            this.y += this.speedY;
-            if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
-            if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
-        }
-        draw() {
-            ctx.fillStyle = 'rgba(0, 242, 255, 0.5)';
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-            ctx.fill();
-        }
-    }
+      }
+      const sourceVideo = result && result.tagName === 'VIDEO' ? result : null;
+      const container = $('videoPreview');
+      container.innerHTML = '';
+      if (sourceVideo) {
+        videoElement = sourceVideo;
+        videoElement.controls = true;
+        videoElement.playsInline = true;
+        videoElement.style.width = '100%';
+        videoElement.style.maxHeight = '560px';
+        videoElement.style.borderRadius = '10px';
+        container.appendChild(videoElement);
+        const src = videoElement.currentSrc || videoElement.src || (videoElement.querySelector('source') && videoElement.querySelector('source').src);
+        if (src && src.startsWith('blob:')) videoObjectUrl = src;
+        $('downloadBtn').disabled = !src;
+        $('downloadBtn').dataset.src = src || '';
+        $('downloadBtn').dataset.filename = 'video-affiliate-ai.mp4';
+      } else if (typeof result === 'string') {
+        const video = document.createElement('video');
+        video.src = result; video.controls = true; video.playsInline = true; video.style.width = '100%';
+        container.appendChild(video); videoElement = video;
+        $('downloadBtn').disabled = false; $('downloadBtn').dataset.src = result;
+      } else {
+        throw new Error('AI mengembalikan format video yang belum dikenali. Coba model lain.');
+      }
+      status('Video selesai dibuat. Putar hasilnya dan gunakan tombol unduh jika tersedia.', 'success');
+    } catch (err) {
+      const msg = err && err.message ? err.message : String(err);
+      status('Gagal membuat video: ' + msg + '\n\nPeriksa login/kredit Puter, koneksi internet, ukuran foto, dan dukungan model. Tidak ada video yang dibuat jika permintaan AI gagal.', 'error');
+    } finally { setBusy(false); }
+  });
 
-    function initParticles() {
-        particles = [];
-        const particleCount = Math.min(100, Math.floor(window.innerWidth / 15));
-        for (let i = 0; i < particleCount; i++) {
-            particles.push(new Particle());
-        }
-    }
+  $('downloadBtn').addEventListener('click', async () => {
+    const src = $('downloadBtn').dataset.src;
+    if (!src) { status('Sumber unduhan belum tersedia. Coba buat video lagi.', 'error'); return; }
+    try {
+      const a = document.createElement('a');
+      a.href = src;
+      a.download = $('downloadBtn').dataset.filename || 'video-affiliate-ai.mp4';
+      a.target = '_blank';
+      document.body.appendChild(a); a.click(); a.remove();
+      status('Permintaan unduh dibuka. Jika file hanya diputar di tab baru, gunakan menu unduh pada pemutar/browser.', 'success');
+    } catch (err) { status('Unduhan tidak dapat dimulai: ' + err.message, 'error'); }
+  });
 
-    function connectParticles() {
-        for (let a = 0; a < particles.length; a++) {
-            for (let b = a; b < particles.length; b++) {
-                const dx = particles[a].x - particles[b].x;
-                const dy = particles[a].y - particles[b].y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist < 120) {
-                    ctx.strokeStyle = `rgba(112, 0, 255, ${0.15 - dist/800})`;
-                    ctx.lineWidth = 1;
-                    ctx.beginPath();
-                    ctx.moveTo(particles[a].x, particles[a].y);
-                    ctx.lineTo(particles[b].x, particles[b].y);
-                    ctx.stroke();
-                }
-            }
-        }
-    }
+  $('captionBtn').addEventListener('click', async () => {
+    if (!window.puter || !puter.ai || !puter.ai.chat) { status('Puter AI belum termuat. Periksa koneksi internet.', 'error'); return; }
+    $('captionBtn').disabled = true;
+    try {
+      const name = $('productName').value.trim() || 'produk ini';
+      const prompt = 'Tulis 3 pilihan caption affiliate berbahasa Indonesia untuk ' + name + '. Gaya natural, menarik, tidak berlebihan. Jangan membuat klaim manfaat, harga, diskon, stok, atau hasil yang tidak diberikan. Sertakan CTA sopan dan tagar relevan. Beri pengingat singkat untuk menambahkan tautan affiliate sendiri. Jangan mengarang spesifikasi produk.';
+      const response = await puter.ai.chat(prompt, { model: 'gpt-5.4-nano' });
+      let text = '';
+      if (typeof response === 'string') text = response;
+      else if (response && response.message && typeof response.message.content === 'string') text = response.message.content;
+      else text = JSON.stringify(response);
+      $('caption').value = text;
+      status('Caption AI selesai. Periksa kebenaran isi sebelum diposting.', 'success');
+    } catch (err) { status('Gagal membuat caption: ' + (err.message || err), 'error'); }
+    finally { $('captionBtn').disabled = false; }
+  });
 
-    function animateParticles() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        particles.forEach(p => { p.update(); p.draw(); });
-        connectParticles();
-        requestAnimationFrame(animateParticles);
-    }
+  $('copyCaptionBtn').addEventListener('click', async () => {
+    const text = $('caption').value.trim();
+    if (!text) { status('Belum ada caption untuk disalin.', 'error'); return; }
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) await navigator.clipboard.writeText(text);
+      else { $('caption').select(); document.execCommand('copy'); }
+      status('Caption disalin.', 'success');
+    } catch (err) { status('Tidak dapat menyalin otomatis. Pilih teks caption lalu salin manual.', 'error'); }
+  });
 
-    initParticles();
-    animateParticles();
+  $('newBtn').addEventListener('click', () => {
+    if (busy) return;
+    imageDataUrl = null; videoElement = null; videoObjectUrl = null;
+    $('photoInput').value = ''; $('photoPreview').src = ''; $('photoPreview').classList.add('hidden'); $('uploadPrompt').classList.remove('hidden');
+    $('productName').value = ''; $('extraPrompt').value = ''; $('caption').value = '';
+    $('videoPreview').innerHTML = '<div class="empty"><div class="symbol">▧ ▶</div><strong>Video akan tampil di sini</strong><div style="margin-top:5px">Unggah foto lalu tekan “Buat video hidup”.</div></div>';
+    $('downloadBtn').disabled = true; $('downloadBtn').dataset.src = '';
+    $('status').className = 'status'; $('status').textContent = '';
+  });
+})();
 </script>
-
 </body>
 </html>
